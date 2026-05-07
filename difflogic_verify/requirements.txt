@@ -1,0 +1,14 @@
+# Install local datasets_neus package
+-e datasets_neus
+
+# Core libraries
+numpy==1.26.4
+torch==1.9.1  # tested with 1.9.1
+tqdm
+z3-solver
+pandas
+scikit-learn
+kagglehub
+folktables
+matplotlib
+rich
