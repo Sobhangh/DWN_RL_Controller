@@ -5,6 +5,55 @@ import torch, torch.nn as nn
 from pathlib import Path
 from typing import Union
 
+
+class _ThermometerBoundaryGradFn(torch.autograd.Function):
+    """Hard thermometer forward with custom boundary-based backward."""
+
+    @staticmethod
+    def forward(ctx, x, thresholds, cmp):
+        # x: (..., D), thresholds: (D, B) or (B,), cmp: (..., D, B)
+        # Note: this class did not exist in the initial version.
+        ctx.save_for_backward(cmp)
+        return cmp
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        (cmp,) = ctx.saved_tensors
+        # grad_output: (..., D, B)
+        n_bits = cmp.shape[-1]
+
+        ones_count = cmp.sum(dim=-1).long()  # (..., D)
+
+        grad_last_one = torch.zeros_like(ones_count, dtype=grad_output.dtype)
+        has_last_one = ones_count > 0
+        if has_last_one.any():
+            last_idx = (ones_count - 1).clamp(min=0).unsqueeze(-1)
+            gathered_last = torch.gather(grad_output, -1, last_idx).squeeze(-1)
+            grad_last_one = torch.where(has_last_one, gathered_last, grad_last_one)
+
+        grad_next_zero = torch.zeros_like(ones_count, dtype=grad_output.dtype)
+        has_next_zero = ones_count < n_bits
+        if has_next_zero.any():
+            next_idx = ones_count.clamp(max=n_bits - 1).unsqueeze(-1)
+            gathered_next = torch.gather(grad_output, -1, next_idx).squeeze(-1)
+            grad_next_zero = torch.where(has_next_zero, gathered_next, grad_next_zero)
+
+        # Rule:
+        # 1) pass grad(last 1) if positive  → GD will push x down, flipping last 1→0 to reduce loss
+        # 2) else pass grad(next 0) if negative → GD will push x up, flipping next 0→1 to reduce loss
+        # 3) else pass 0
+        use_last = grad_last_one > 0
+        use_next = (~use_last) & (grad_next_zero < 0)
+        grad_x = torch.where(
+            use_last,
+            grad_last_one,
+            torch.where(use_next, grad_next_zero, torch.zeros_like(grad_next_zero)),
+        )
+        grad_x_mean = grad_output.abs().mean()
+        grad_x = grad_x / (grad_x_mean)
+
+        return grad_x , None, None #* n_bits * 100000
+
 class ThermometerBase:
     """
     Base utilities shared by Thermometer + DistributiveThermometer.
@@ -98,8 +147,19 @@ class ThermometerBase:
         self.thresholds = self.thresholds.cuda()
         print(self.thresholds.device)
     def binarize(self,x):
-        with torch.no_grad():
-            return self.encode(x,binary=True)
+        # Initial version (no backward gradient through binarize):
+        # with torch.no_grad():
+        #     return self.encode(x, binary=True)
+
+        if self.thresholds is None:
+            raise RuntimeError("fit() must be called before binarize().")
+        x_t = self._as_tensor(x, device=self.thresholds.device)
+        if len(x_t.shape) == 1:
+            x_t = x_t.unsqueeze(0)
+        cmp_flat = self.encode(x_t, binary=True)
+        cmp = cmp_flat.view(*x_t.shape, -1)
+        cmp = _ThermometerBoundaryGradFn.apply(x_t, self.thresholds, cmp)
+        return cmp.flatten(-2)
 
 
 class ThermometerUniform(ThermometerBase):
@@ -134,8 +194,10 @@ class ThermometerUniform(ThermometerBase):
         return self.thresholds
 
     def binarize(self,x):
-        with torch.no_grad():
-            return self.encode(x,binary=True)
+        # Initial version in this class (before delegating to custom-gradient base):
+        # with torch.no_grad():
+        #     return self.encode(x, binary=True)
+        return super().binarize(x)
 
 from torch.distributions.normal import Normal
 class ThermometerGaussian(ThermometerBase):

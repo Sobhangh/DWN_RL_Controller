@@ -6,6 +6,7 @@ import torch.nn.functional as F
 
 def pad_dim_if_needed(dim, group_size):
     """Pad scalar dim so it's divisible by group_size."""
+    #print(f"Padding dim {dim} to be divisible by group size {group_size}")
     r = dim % group_size
     if r == 0:
         return dim
@@ -43,6 +44,7 @@ class WNN(nn.Module):
                  map="learnable", # the first layers connectivity
                  init_log_alpha=-0.6931,
                  later_learnable=True,
+                 regression=True
                  ):
         super().__init__()
         self.device = device
@@ -89,11 +91,14 @@ class WNN(nn.Module):
             assert sizes[-1] % act_dim == 0, "Last LGN layer size must be divisible by act_dim"
             
         actor_net_lgn.append(dwn.GroupSum(k=act_dim, tau=1.0))
-        actor_net_lgn.append(RegressionBucketLayer(sizes[-1], act_dim, 
-                                                   init_log_alpha=init_log_alpha))
+        if regression:
+            actor_net_lgn.append(RegressionBucketLayer(sizes[-1], act_dim, 
+                                                    init_log_alpha=init_log_alpha))
 
         self.thermometer = thermometer
         self.net = actor_net_lgn
+
+    
         
     def forward(self, x):
         obs_t = torch.as_tensor(x, dtype=torch.float32)
