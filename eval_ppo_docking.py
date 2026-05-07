@@ -334,10 +334,10 @@ def is_safe_step(obs, safety_n):
         return True
     # multiply x and y with 100 and divide velocity by 2. Do not change x0
     x = x0.copy()
-    x[0] = x[0] * 100.0
-    x[1] = x[1] * 100.0
-    x[2] = x[2] / 2.0
-    x[3] = x[3] / 2.0
+    # x[0] = x[0] * 100.0
+    # x[1] = x[1] * 100.0
+    # x[2] = x[2] / 2.0
+    # x[3] = x[3] / 2.0
     
     pos_norm = np.sqrt(x[0] * x[0] + x[1] * x[1])
     rhs = 0.2 + (2.0 * float(safety_n)) * pos_norm
@@ -702,6 +702,7 @@ def main():
 
         x0, y0 = obs_xy(obs_raw)
         xy_points.append([x0, y0])
+        print('initial obs: ', obs_raw)
         init_step_safe = is_safe_step(obs_raw, safety_n)
         safety_violation_mask.append(not init_step_safe)
         if not init_step_safe:
