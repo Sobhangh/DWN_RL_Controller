@@ -238,7 +238,7 @@ def make_env(env_id, idx, capture_video, run_name, gamma):
 
     return thunk
 
-
+avg_reward_save = {-2.5: False, -1.5: False, -0.5: False, 0.5: False, 1.5: False, 2.5: False}
 def evaluate(
     agent,
     make_env_fn: Callable,
@@ -284,6 +284,14 @@ def evaluate(
         writer.add_scalar("eval/episodic_return_mean", ret_mean, global_step or 0)
         writer.add_scalar("eval/episodic_return_std", ret_std, global_step or 0)
         writer.add_scalar("eval/episodic_length_mean", len_mean, global_step or 0)
+    for threshold in sorted(avg_reward_save.keys()):
+        if ret_mean >= threshold and not avg_reward_save[threshold]:
+            print(f"Average reward {ret_mean} crossed threshold {threshold}, saving model...")
+            avg_reward_save[threshold] = True
+            save_dir = os.path.join(args.save_path, run_name)
+            os.makedirs(save_dir, exist_ok=True)
+            model_path = os.path.join(save_dir, f"{run_name}_reward_{threshold}.cleanrl_model")
+            agent.save_checkpoint(model_path, optimizer=None)
     agent.train()
     return episodic_returns
 

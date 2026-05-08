@@ -15,6 +15,26 @@ from ppo_train_docking import Agent, ObsNorm, WNNActor, make_env
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+"""
+Results for: BeforeCEGIS_ppo_train_docking.cleanrl_model (It got trained for 30 min and got avg reward -2.8)
+Docking PPO Evaluation
+========================================================================
+controller: BeforeCEGIS_ppo_train_docking.cleanrl_model
+model_path: /content/DWN_RL_Controller/BeforeCEGIS_ppo_train_docking.cleanrl_model
+network_type: wnn
+episodes: 100
+deterministic: True
+device: cuda
+safety_n: 0.00102700
+------------------------------------------------------------------------
+Safety success (trajectory has NO safety violation): 1.0000 (100.00%)
+Safety violation rate (inverse): 0.0000 (0.00%)
+Docking success rate (entered docking region): 0.0300 (3.00%)
+Strict success rate (entered region + velocity constraint): 0.0300 (3.00%)
+Average steps till docking (docking-success episodes only): 206.67
+Average reward: -1.634714
+Reward standard deviation: 0.987924
+"""
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -334,10 +354,10 @@ def is_safe_step(obs, safety_n):
         return True
     # multiply x and y with 100 and divide velocity by 2. Do not change x0
     x = x0.copy()
-    # x[0] = x[0] * 100.0
-    # x[1] = x[1] * 100.0
-    # x[2] = x[2] / 2.0
-    # x[3] = x[3] / 2.0
+    x[0] = x[0] * 100.0
+    x[1] = x[1] * 100.0
+    x[2] = x[2] / 2.0
+    x[3] = x[3] / 2.0
     
     pos_norm = np.sqrt(x[0] * x[0] + x[1] * x[1])
     rhs = 0.2 + (2.0 * float(safety_n)) * pos_norm
@@ -645,7 +665,7 @@ def main():
         capture_video=False,
         run_name="eval",
         gamma=0.99,
-        env_config_file=args.env_config_file,
+        #env_config_file=args.env_config_file,
     )()
     velocity_denorm_mapping = infer_velocity_denorm_mapping(eval_env)
     obs_dim = int(np.prod(eval_env.observation_space.shape))
