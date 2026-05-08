@@ -8,9 +8,9 @@ def apply_preset(args):
         preset_values = {
             "env_id": "Docking2d",
             "total_timesteps": 1200_000,  # 800_000 = 200 iterations * train_batch_size 4000 in SafeRL PPO setup
-            "learning_rate": 5e-5,
+            "learning_rate": 5e-3,
             "num_envs": 4,
-            "num_steps": 1000,  # batch_size 4000 (close to SafeRL train_batch_size)
+            "num_steps": 4000,  # batch_size 4000 (close to SafeRL train_batch_size)
             "anneal_lr": False,
             "gamma": 0.968559,
             "gae_lambda": 0.928544,
