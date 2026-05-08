@@ -7,7 +7,7 @@ def apply_preset(args):
     if args.preset == "docking2d_saferl":
         preset_values = {
             "env_id": "Docking2d",
-            "total_timesteps": 400_000,  # 800_000 = 200 iterations * train_batch_size 4000 in SafeRL PPO setup
+            "total_timesteps": 800_000,  # 800_000 = 200 iterations * train_batch_size 4000 in SafeRL PPO setup
             "learning_rate": 5e-5,
             "num_envs": 4,
             "num_steps": 1000,  # batch_size 4000 (close to SafeRL train_batch_size)
