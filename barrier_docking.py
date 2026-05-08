@@ -437,8 +437,6 @@ def transiton_function_bitvector(state_bits, control_bits, postfix="prime"):
         (-pos_limit, pos_limit, N_BITS),
         (-vel_limit, vel_limit, N_BITS),
         (-vel_limit, vel_limit, N_BITS),
-        (-1.0, 1.0, N_BITS),
-        (-1.0, 1.0, N_BITS),
     ]
 
     # Coefficients in output order: [fx, fy, fvx, fvy]

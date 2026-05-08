@@ -16,6 +16,27 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 """
+Resuls for eval_reward_2.5.cleanrl_model trained with 151 bits and got a reward of 3.6 after 12 iterations (4k steps each):
+
+controller: eval_reward_2.5.cleanrl_model
+model_path: /content/DWN_RL_Controller/eval_reward_2.5.cleanrl_model
+network_type: wnn
+episodes: 100
+deterministic: True
+device: cuda
+safety_n: 0.00102700
+------------------------------------------------------------------------
+Safety success (trajectory has NO safety violation): 1.0000 (100.00%)
+Safety violation rate (inverse): 0.0000 (0.00%)
+Docking success rate (entered docking region): 1.0000 (100.00%)
+Strict success rate (entered region + velocity constraint): 1.0000 (100.00%)
+Average steps till docking (docking-success episodes only): 43.63
+Average reward: 4.336421
+Reward standard deviation: 0.172008
+
+
+
+
 Results for: BeforeCEGIS_ppo_train_docking.cleanrl_model (It got trained for 30 min and got avg reward -2.8)
 Docking PPO Evaluation
 ========================================================================
