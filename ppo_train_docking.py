@@ -79,7 +79,7 @@ class Args:
 
     # WNN / LGN
     size: int = 2048
-    bits: int = 100
+    bits: int = 151
     n: int = 2
     l: int = 2
     init_log_alpha: float = -0.6931
