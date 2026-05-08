@@ -423,20 +423,22 @@ def transiton_function_bitvector(state_bits, control_bits, postfix="prime"):
 
     # Input domains for [x, y, vx, vy, ux, uy]
     _DOMAINS_IN = [
-        (-6.0, 6.0, 100),
-        (-6.0, 6.0, 100),
-        (-0.5, 0.5, 100),
-        (-0.5, 0.5, 100),
-        (-1.0, 1.0, 100),
-        (-1.0, 1.0, 100),
+        (-pos_limit, pos_limit, N_BITS),
+        (-pos_limit, pos_limit, N_BITS),
+        (-vel_limit, vel_limit, N_BITS),
+        (-vel_limit, vel_limit, N_BITS),
+        (-1.0, 1.0, N_BITS),
+        (-1.0, 1.0, N_BITS),
     ]
 
     # Output domains for [x', y', vx', vy']
     _DOMAINS_OUT = [
-        (-6.0, 6.0, 100),
-        (-6.0, 6.0, 100),
-        (-0.5, 0.5, 100),
-        (-0.5, 0.5, 100),
+        (-pos_limit, pos_limit, N_BITS),
+        (-pos_limit, pos_limit, N_BITS),
+        (-vel_limit, vel_limit, N_BITS),
+        (-vel_limit, vel_limit, N_BITS),
+        (-1.0, 1.0, N_BITS),
+        (-1.0, 1.0, N_BITS),
     ]
 
     # Coefficients in output order: [fx, fy, fvx, fvy]
