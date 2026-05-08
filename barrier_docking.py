@@ -871,7 +871,7 @@ def verification_loop(controller_nn, load_model = False):
             single_observation_space=eval_env.observation_space,
             single_action_space=eval_env.action_space,
         )
-        model_path = "BeforeCEGIS_ppo_train_docking.cleanrl_model"
+        model_path = "eval_reward_2.5.cleanrl_model" #"BeforeCEGIS_ppo_train_docking.cleanrl_model"
         controller_nn = WNNActor.from_checkpoint(env=env_view, path=str(model_path), device="cuda")
         controller_nn.use_tanh_final = True
         controller_nn.to("cuda")
